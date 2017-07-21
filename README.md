@@ -2,7 +2,7 @@
 A Discord bot made with JDA and Spring Boot. This project is also running on Heroku.
 
 ## Commands
-All commands can be found in src/main/java/com/ricky/spring/MessageResponder.java
+All commands can be found in [src/main/java/com/ricky/spring/MessageResponder.java](https://github.com/RickyDiculous/DiscordBot/blob/master/src/main/java/com/ricky/spring/MessageResponder.java).
 Here are a few of my favorites:
 
 ~pokedex: gets pokedex info from a name and entry number.
