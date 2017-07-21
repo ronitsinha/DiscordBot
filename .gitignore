@@ -1,6 +1,8 @@
 target/
 !.mvn/wrapper/maven-wrapper.jar
 
+src/main/java/com/ricky/spring/Constants.java
+
 ### STS ###
 .apt_generated
 .classpath

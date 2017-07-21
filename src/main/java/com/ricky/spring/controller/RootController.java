@@ -1,6 +1,6 @@
 package com.ricky.spring.controller;
 
-import org.springframework.context.support.FileSystemXmlApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,11 +14,22 @@ public class RootController {
 	
 	@RequestMapping("/wakemydyno.txt")
 	public Resource wakemydyno () {
-		FileSystemXmlApplicationContext ctx = new FileSystemXmlApplicationContext ();
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext ();
 		
-		Resource retval = ctx.getResource("file:wakemydyno.txt");
+		Resource retval = ctx.getResource("classpath:com/ricky/spring/controller/wakemydyno.txt");
 		
-		ctx.close();
+		ctx.close ();
+		
+		return retval;
+	}
+	
+	@RequestMapping("/output.wav")
+	public Resource output () {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext ();
+		
+		Resource retval = ctx.getResource("file:target/output.wav");
+		
+		ctx.close ();
 		
 		return retval;
 	}

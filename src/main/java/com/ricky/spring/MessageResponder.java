@@ -4,59 +4,43 @@ import java.io.IOException;
 
 import org.apache.commons.lang3.text.WordUtils;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import com.github.codingricky.marvel.model.MarvelCharacter;
+import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
+import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
+import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
+import javax.sound.sampled.AudioInputStream;
+
+import marytts.exceptions.SynthesisException;
+import marytts.util.data.audio.MaryAudioUtils;
+
+import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
+import com.ricky.audio.AudioPlayerSendHandler;
+import com.ricky.audio.TrackScheduler;
+
 public class MessageResponder extends ListenerAdapter {
-	void logCommand (MessageReceivedEvent event) {
+	void processCommand (MessageReceivedEvent event, String response) {
+		
+		event.getTextChannel().sendMessage(response).queue();
+		
 		String message = event.getMessage().getContent();
 		
 		if (event.getAuthor().isBot()) {
 			System.out.println("BOT " + event.getAuthor().getName() + " issued command: " + message);
 		} else {
-			System.out.println("USER " + event.getAuthor().getName() + " issued command: " + message);			
+			System.out.println("USER " + event.getAuthor().getName() + " issued command: " + message);		
 		}
-	}
-	
-	// Get a Marvel character's id from name.
-	int marvelCharacterIDFromName (String name) {
-		for (int i = 0; i < Constants.allCharacters.size(); i ++) {
-			String parsedSearch = name;
-			String parsedName = Constants.allCharacters.get(i).getName();
-			
-			int beginParenthRemove = -1;
-			int endParenthRemove = -1;
-			
-			if (parsedName.contains("(") && parsedName.contains(")")) {
-				beginParenthRemove = parsedName.indexOf("(");
-				endParenthRemove = parsedName.indexOf(")");
-				
-				if (parsedName.indexOf(")") == parsedName.length() - 1) {
-					parsedName = parsedName.substring(0, beginParenthRemove);
-				} else {
-					parsedName = parsedName.substring(0, beginParenthRemove) + parsedName.substring(endParenthRemove + 1, parsedName.length());
-				}
-			}
-						
-			parsedSearch = parsedSearch.toUpperCase().replaceAll(" of ", "").replaceAll(" the ", "").replaceAll("\\s+", "").replaceAll("-", "");
-			parsedName = parsedName.toUpperCase().replaceAll("\\s+", "").replaceAll("-", "");
-			
-			System.out.println(Constants.allCharacters.get(i).getName());
-			
-			if (parsedSearch.equals(parsedName)) {
-				System.out.println("\nSearch Result: " + Constants.allCharacters.get(i).getName());
-				return Constants.allCharacters.get(i).getId();
-			}
-		}
-		
-		// No character found: return -1;
-		return -1;
 	}
 	
 	public void onMessageReceived (MessageReceivedEvent event) {
@@ -67,16 +51,15 @@ public class MessageResponder extends ListenerAdapter {
 			String senderName = event.getAuthor().getName();			
 			String response = "Hello, **" + senderName + "**, it's good to hear from you!";
 			
-			event.getTextChannel().sendMessage(response).queue();
-			logCommand (event);
+			processCommand (event, response);
+
 		} else if (message.startsWith(Constants.COMMAND_PREFIX + "knockjoke")) {
 			// Tell a random knock-knock joke from a list of them stored in Constants.knockjokes			
 			int index = Constants.gen.nextInt(Constants.knockjokes.size ());
 			
 			String response = Constants.knockjokes.get(index);
 
-			event.getTextChannel().sendMessage(response).queue();
-			logCommand (event);
+			processCommand (event, response);
 
 		} else if (message.startsWith(Constants.COMMAND_PREFIX + "roll")) {
 			// Split the string into command and modifier, where command is .roll and modifier is the die to roll.
@@ -99,8 +82,7 @@ public class MessageResponder extends ListenerAdapter {
 				}
 			}
 			
-			event.getTextChannel().sendMessage(response).queue();
-			logCommand (event);
+			processCommand (event, response);
 
 		} else if (message.startsWith(Constants.COMMAND_PREFIX + "pokedex")) {
 			// The second part of the message (the name of the pokemon) is used to search the online pokedex
@@ -154,8 +136,7 @@ public class MessageResponder extends ListenerAdapter {
 				}
 			} 
 			
-			event.getTextChannel().sendMessage(response).queue();
-			logCommand (event);
+			processCommand (event, response);
 
 		} else if (message.startsWith(Constants.COMMAND_PREFIX + "ign")) {
 			// Finds IGN game review from a title (i.e portal 2)
@@ -247,39 +228,10 @@ public class MessageResponder extends ListenerAdapter {
 				response = "*To use this command, do '.ign [name of game]', such as '.ign super mario galaxy'.*";
 			}
 			
-			event.getTextChannel().sendMessage(response).queue();
-			logCommand (event);
+			processCommand (event, response);
 
-		} else if (message.startsWith(Constants.COMMAND_PREFIX + "marvel")) {
-			String response = "Cool Marvel stuff!";
-			
-			if (message.contains(" ")) {
-				String[] messageSplit = message.split("\\s+", 3);
-				
-				if (messageSplit.length > 2) {
-					if (messageSplit[1].equals("character")) {
-						try {
-							int id = marvelCharacterIDFromName (messageSplit[2]);
-							
-							if (id != -1) {
-								MarvelCharacter character = Constants.marvelClient.getCharacter(id).getData().getResults().get(0);
-								
-								response = "**" + character.getName() + "**\n" + character.getDescription() + "\n" + character.getThumbnail().getPath() + "/standard_amazing." + character.getThumbnail().getExtension();
-							} else {
-								response = "*Error: could not find character id: " + messageSplit[2] + "*";
-							}
-						} catch (IOException e) {
-							response = "*Error: could not find character: " + messageSplit[2] + "*";
-							e.printStackTrace();
-						}
-					}
-				}
-			}
-			
-			event.getTextChannel().sendMessage(response).queue();
-			logCommand (event);	
-			
 		} else if (message.startsWith(Constants.COMMAND_PREFIX + "dictionary")) {
+			// Defines a word using Oxford Dictionaries API
 			
 			String response = "Define words using the Oxford Dictionary!";
 
@@ -289,16 +241,110 @@ public class MessageResponder extends ListenerAdapter {
 				if (messageSplit.length > 1) {
 					String requestURL = Constants.OXFORD_BASE_URL + "/entries/en/" + messageSplit[1].toLowerCase();
 					try {
-						Document data = Jsoup.connect(requestURL).data("app_id", Constants.OXFORD_APP_ID, "app_key", Constants.OXFORD_APP_KEY).get();
+						JSONObject data = new JSONObject (Jsoup.connect(requestURL).header("app_id", Constants.OXFORD_APP_ID).header("app_key", Constants.OXFORD_APP_KEY).ignoreContentType(true).execute().body());
+						
+						JSONArray results = data.getJSONArray("results");
+						JSONObject resultsObj0 = results.getJSONObject(0);
+						JSONArray lexicalEntires = resultsObj0.getJSONArray("lexicalEntries");
+						JSONObject lexObj0 = lexicalEntires.getJSONObject(0);
+						
+						String partOfSpeech = lexObj0.getString("lexicalCategory");
+						JSONArray entries = lexObj0.getJSONArray("entries");
+						
+						response = "**" + WordUtils.capitalize(messageSplit[1]) + "** *(" + partOfSpeech + ")*:\n";
+						
+						for (int i = 0; i < entries.length(); i ++) {
+							JSONObject entryObj = entries.getJSONObject(i);
+							JSONArray senses = entryObj.getJSONArray("senses");
+							JSONObject senseObj = senses.getJSONObject(0);
+							JSONArray definitions = senseObj.getJSONArray("definitions");
+							
+							StringBuilder strb = new StringBuilder (definitions.getString(0));
+							strb.setCharAt(0, Character.toUpperCase(strb.charAt(0)));
+							
+							
+							response += "	-" + strb.toString() + "\n";
+						}
+												
 						System.out.println(data.toString());
-					} catch (IOException e) {
+					} catch (IOException | JSONException e) {
+						response = "*Sorry, I couldn't find a definition for " + messageSplit[1] + ".*";
 						e.printStackTrace();
 					}
 				}
 			}
 		
-			event.getTextChannel().sendMessage(response).queue();
-			logCommand (event);
+			processCommand (event, response);
+			
+		} else if (message.startsWith(Constants.COMMAND_PREFIX + "speak")) {
+			// Text to speech in voice channel.
+			String response = "Success!";
+			
+			VoiceChannel userChan = event.getGuild().getMember(event.getAuthor()).getVoiceState().getChannel();
+			
+			if (userChan != null) {
+				if (message.contains(" ")) {
+					String[] messageSplit = message.split("\\s+", 2);
+					
+					if (messageSplit.length > 1) {
+						String outputFileName = "target/output.wav";
+						
+						AudioInputStream audio = null;
+						try {
+							audio = Constants.mary.generateAudio(messageSplit [1]);
+						} catch (SynthesisException e) {
+							System.err.println("Synthesis failed: " + e.getMessage());
+							System.exit(1);
+						}
+
+						// Write to output (saved in target/output.wav as indicated by outputFileName).
+						double[] samples = MaryAudioUtils.getSamplesAsDoubleArray(audio);
+						try {
+							MaryAudioUtils.writeWavFile(samples, outputFileName, audio.getFormat());
+							System.out.println("Output written to " + outputFileName);
+						} catch (IOException e) {
+							System.err.println("Could not write to file: " + outputFileName + "\n" + e.getMessage());
+							System.exit(1);
+						}
+						
+						TrackScheduler trackScheduler = new TrackScheduler (Constants.player);
+						Constants.player.addListener(trackScheduler);
+						
+						event.getGuild().getAudioManager ().setSendingHandler(new AudioPlayerSendHandler (Constants.player));
+						
+						Constants.playerManager.loadItemOrdered(event.getGuild(), "https://springbot.herokuapp.com/output.wav", new AudioLoadResultHandler() {
+							  @Override
+							  public void trackLoaded(AudioTrack track) {
+							    trackScheduler.queue(track, event.getGuild().getMember(event.getAuthor()));
+							  }
+
+							  @Override
+							  public void playlistLoaded(AudioPlaylist playlist) {
+							    for (AudioTrack track : playlist.getTracks()) {
+							      trackScheduler.queue(track, event.getGuild().getMember(event.getAuthor()));
+							    }
+							  }
+
+							  @Override
+							  public void noMatches() {
+							    // Notify the user that we've got nothing
+								System.out.println("We've got nothin'");
+							  }
+
+							  @Override
+							  public void loadFailed(FriendlyException throwable) {
+							    // Notify the user that everything exploded
+								System.out.println("Everything exploded!");
+							  }
+						});
+											
+					}
+				}
+			} else {
+				response = "*Could not find " + event.getAuthor().getName() + " in any voice channels. Please join a voice channel to use this command.*";
+			}
+				
+			processCommand (event, response);
 			
 		}
 	}
