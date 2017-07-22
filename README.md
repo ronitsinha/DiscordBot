@@ -21,4 +21,4 @@ Here are a few of my favorites:
 ```
 
 ## Dependencies
-See the [pom.xml](https://github.com/RickyDiculous/DiscordBot/blob/master/pom.xml) for all dependencies used.
+See the [pom.xml](https://github.com/RickyDiculous/DiscordBot/blob/master/pom.xml) for all the libraries and APIs used by this project.
