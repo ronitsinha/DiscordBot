@@ -1,5 +1,5 @@
 # DiscordBot
-A Discord bot made with JDA and Spring Boot. This project is also running on Heroku.
+A Discord bot made with [JDA](https://github.com/DV8FromTheWorld/JDA) and [Spring](https://spring.io/). This project is also running on [Heroku](https://dashboard.heroku.com/apps).
 
 ## Commands
 All commands can be found in [src/main/java/com/ricky/spring/MessageResponder.java](https://github.com/RickyDiculous/DiscordBot/blob/master/src/main/java/com/ricky/spring/MessageResponder.java).
