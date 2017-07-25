@@ -346,6 +346,37 @@ public class MessageResponder extends ListenerAdapter {
 				
 			processCommand (event, response);
 			
+		} else if (message.startsWith(Constants.COMMAND_PREFIX + "iplocate")) {
+			String response = "Find a computer's location from its ip address or hostname!";
+			
+			if (message.contains(" ")) {
+				String[] messageSplit = message.split("\\s+");
+				
+				if (messageSplit.length > 1) {
+					String requestURL = Constants.FREEGEOIP_BASE_URL + messageSplit[1];
+					try {
+						JSONObject data = new JSONObject (Jsoup.connect(requestURL).ignoreContentType(true).execute().body());
+						response = data.toString();
+						
+						response = "Located **" + messageSplit[1] + "**! Results follow:" 
+								+ "\n\nIP: " + data.getString("ip") 
+								+ "\nCity: " + data.getString("city") 
+								+ "\nRegion: " + data.getString("region_name") 
+								+ "\nCountry: " + data.getString("country_name")
+								+ "\nTime Zone: " + data.getString("time_zone")
+								+ "\n\nLatitude: " + data.getDouble ("latitude")
+								+ "\nLongitude: " + data.getDouble ("longitude");
+					} catch (JSONException e) {
+						response = "Oops! Something went wrong with getting JSON!";
+						e.printStackTrace();
+					} catch (IOException e) {
+						response = "IP address or hostname not found.";
+						e.printStackTrace();
+					}
+				}
+			}
+						
+			processCommand (event, response);
 		}
 	}
 }
