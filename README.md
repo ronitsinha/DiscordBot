@@ -23,5 +23,5 @@ Here are a few of my favorites:
 ## Dependencies
 See the [pom.xml](https://github.com/RickyDiculous/DiscordBot/blob/master/pom.xml) for all the libraries and APIs used by this project.
 Along with the pom.xml dependencies, I've also used these web APIs:
-	- [Oxford Dictionaries API](https://developer.oxforddictionaries.com/)
-	- [freegeoip.net](http://freegeoip.net/)
+	* [Oxford Dictionaries API](https://developer.oxforddictionaries.com/)
+	* [freegeoip.net](http://freegeoip.net/)
