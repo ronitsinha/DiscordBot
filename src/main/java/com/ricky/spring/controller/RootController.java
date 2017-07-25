@@ -33,4 +33,15 @@ public class RootController {
 		
 		return retval;
 	}
+	
+	@RequestMapping("/knockjokes.txt")
+	public Resource knockjokes () {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext ();
+		
+		Resource retval = ctx.getResource("classpath:com/ricky/spring/controller/knockjokes.txt");
+		
+		ctx.close ();
+		
+		return retval;
+	}
 }
