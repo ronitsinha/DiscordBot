@@ -12,16 +12,18 @@ public class RootController {
 		return "Hello from Ronit!";
 	}
 	
-	@RequestMapping("/wakemydyno.txt")
-	public Resource wakemydyno () {
-		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext ();
-		
-		Resource retval = ctx.getResource("classpath:com/ricky/spring/controller/wakemydyno.txt");
-		
-		ctx.close ();
-		
-		return retval;
-	}
+/* This is commented out because it uses up all my free heroku hours */
+	
+//	@RequestMapping("/wakemydyno.txt")
+//	public Resource wakemydyno () {
+//		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext ();
+//		
+//		Resource retval = ctx.getResource("classpath:com/ricky/spring/controller/wakemydyno.txt");
+//		
+//		ctx.close ();
+//		
+//		return retval;
+//	}
 	
 	@RequestMapping("/output.wav")
 	public Resource output () {

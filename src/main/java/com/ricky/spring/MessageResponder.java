@@ -347,6 +347,7 @@ public class MessageResponder extends ListenerAdapter {
 			processCommand (event, response);
 			
 		} else if (message.startsWith(Constants.COMMAND_PREFIX + "iplocate")) {
+			// Locate physical location of ip address using freegeoip.net and Jsoup.
 			String response = "Find a computer's location from its ip address or hostname!";
 			
 			if (message.contains(" ")) {
@@ -377,6 +378,53 @@ public class MessageResponder extends ListenerAdapter {
 			}
 						
 			processCommand (event, response);
+			
+		} else if (message.startsWith(Constants.COMMAND_PREFIX + "dadjokes")) {
+			String response = "Dad jokes.";
+			
+			Constants.dadJokes = !Constants.dadJokes;
+			
+			if (Constants.dadJokes) { response = "Dad jokes have been enabled."; } else { response = "Dad jokes have been disabled."; }
+			
+			processCommand (event, response);
+			
+		} else if (message.startsWith(Constants.COMMAND_PREFIX + "wake")) {
+			String response = "If the bot is offline, use .wake to wake it up";
+			
+			try {
+				@SuppressWarnings("unused")
+				Document wake = Jsoup.connect("https://springbot.herokuapp.com/").get();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			processCommand (event, response);
+		} else if (Constants.dadJokes) {
+			String keyword = "";
+			
+			if (message.contains(" ")) {
+				String[] messageSplit = message.split("\\s+");
+				
+				if (messageSplit.length > 1) {
+					for (int i = 0; i < messageSplit.length; i++) {
+						if (i < messageSplit.length - 2) {
+							if (messageSplit[i].equalsIgnoreCase("i")) {
+								if (messageSplit[i+1].equalsIgnoreCase("am") || messageSplit[i+1].equalsIgnoreCase("m")) {
+									keyword = messageSplit[i+2];
+								}
+							}
+						} else if (i < messageSplit.length - 1) {
+							if (messageSplit[i].equalsIgnoreCase("i'm") || messageSplit[i].equalsIgnoreCase("im") || messageSplit[i].equalsIgnoreCase("iam")) {
+								keyword = messageSplit[i+1];
+							}
+						}
+					}
+				}
+			}
+			
+			if (!keyword.equals("")) {
+				event.getTextChannel().sendMessage("Hi, " + keyword + ", I'm Dad! Nice to meet you!").queue();
+			}
 		}
 	}
 }
